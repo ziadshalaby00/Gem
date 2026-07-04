@@ -1,0 +1,22 @@
+{
+  "name": "Workout Plan",
+  "short_name": "Workout",
+  "description": "Offline Workout Planner",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f0f1e",
+  "theme_color": "#ff6b35",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
