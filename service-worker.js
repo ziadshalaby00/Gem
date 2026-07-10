@@ -3,7 +3,10 @@ const CACHE_NAME = "workout-v1";
 const FILES = [
     "./",
     "./index.html",
-    "./manifest.json"
+    "./manifest.json",
+    "./data.js",
+    "./logic.js",
+    "./style.css"
 ];
 
 self.addEventListener("install", event => {
