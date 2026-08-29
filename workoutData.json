@@ -1,5 +1,5 @@
 {
-    "START_DATE": "22/6/2026",
+    "START_DATE": "DD/MM/YYYY",
     "days": [
         {
             "id": "pull",

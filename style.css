@@ -691,3 +691,25 @@ body {
         --border-angle: 360deg;
     }
 }
+
+
+
+/* ---------- Footer ---------- */
+.app-footer {
+  text-align: center;
+  padding: 24px 20px 10px;
+  margin-top: 30px;
+  color: #6b6b85;
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.app-footer a {
+  color: #ff9a3c;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+}
