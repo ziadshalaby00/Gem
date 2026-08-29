@@ -4,9 +4,10 @@ const FILES = [
     "./",
     "./index.html",
     "./manifest.json",
-    "./data.js",
+    "./workoutData.json",
     "./logic.js",
-    "./style.css"
+    "./style.css",
+    "./export-import.js",
 ];
 
 self.addEventListener("install", event => {

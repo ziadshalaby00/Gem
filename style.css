@@ -564,3 +564,130 @@ body {
   color: #fff;
   border-style: solid;
 }
+
+/* ---------- Data Actions (Export / Import) ---------- */
+.data-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.data-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.export-btn {
+  background: linear-gradient(90deg, #ff6b35, #ff9a3c);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+}
+
+.export-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 107, 53, 0.6);
+}
+
+.import-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ff9a3c;
+  border: 2px solid rgba(255, 154, 60, 0.4);
+}
+
+.import-btn:hover {
+  background: rgba(255, 154, 60, 0.1);
+  border-color: #ff9a3c;
+  transform: translateY(-2px);
+}
+
+.import-input {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .data-actions {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0 10px;
+  }
+  
+  .data-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ---------- Core Day Highlight (Push / Pull / Legs) — Moving Border ---------- */
+.tab-btn.core-day {
+    position: relative;
+    z-index: 0;
+    border-color: transparent;
+}
+
+/* Animated border */
+.tab-btn.core-day::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    padding: 2px;
+    border-radius: 50px;
+
+    background: conic-gradient(
+        from var(--border-angle),
+
+        #ff6b35 0deg,
+        #ff6b35 260deg,
+
+        #ffcc33 285deg,
+        #fff4b0 300deg,
+        #ffcc33 315deg,
+
+        #ff6b35 340deg,
+        #ff6b35 360deg
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    animation: borderColorSpin 3s linear infinite;
+
+    z-index: -1;
+    pointer-events: none;
+}
+
+.tab-btn.core-day.active::before {
+    animation-duration: 1.5s;
+}
+
+@property --border-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes borderColorSpin {
+    from {
+        --border-angle: 0deg;
+    }
+
+    to {
+        --border-angle: 360deg;
+    }
+}

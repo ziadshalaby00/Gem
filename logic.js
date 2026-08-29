@@ -1,54 +1,142 @@
-let currentProgramIndex = 0;
+let currentDayIndex = 0;
+let appData = null;
 
 /* ============================
-   Local Storage Helpers (مصدر واحد)
+   Load JSON Data
 ============================ */
 
-function getDayKey(programId, dayIndex) {
-    return `workout_day_${programId}_${dayIndex}`;
+async function loadData() {
+    try {
+        const response = await fetch('./workoutData.json');
+        if (!response.ok) {
+            throw new Error('Failed to load workoutData.json');
+        }
+        appData = await response.json();
+    } catch (err) {
+        console.error('Error loading JSON:', err);
+        alert("I can't read the workoutData.json file, make sure it exists!");
+    }
 }
 
-function getDayData(programId, dayIndex, defaultExercises) {
-    const key = getDayKey(programId, dayIndex);
+/* ============================
+   Local Storage Helpers
+============================ */
+
+function getDayKey(dayId) {
+    return `workout_day_${dayId}`;
+}
+
+function getColumnMeta(day) {
+    const lastColIndex = day.columns.length - 1;
+    const isWeightColumn = day.columns[lastColIndex].includes("Max Weight");
+    return { lastColIndex, isWeightColumn };
+}
+
+/**
+ * Converts a raw row array — the shape used in workoutData.json and in
+ * exported/imported files, e.g. ["Lat Pulldown", "3", "8-12", 50, "Both"] —
+ * into the internal exercise object { cells, maxWeight, side } used by the app.
+ * The side value ("Both" / "One Side") is just read as the item right after
+ * the weight, exactly like any other cell.
+ */
+function arrayRowToExercise(day, ex) {
+    const { lastColIndex, isWeightColumn } = getColumnMeta(day);
+
+    let maxWeight = "";
+    if (isWeightColumn && typeof ex[lastColIndex] === 'number' && ex[lastColIndex] > 0) {
+        maxWeight = String(ex[lastColIndex]);
+    }
+
+    let side = "both";
+    if (isWeightColumn && typeof ex[lastColIndex + 1] === 'string') {
+        side = ex[lastColIndex + 1].toLowerCase().includes("one") ? "one" : "both";
+    }
+
+    return {
+        cells: ex.slice(0, day.columns.length),
+        maxWeight: maxWeight,
+        side: side
+    };
+}
+
+/**
+ * Converts an internal exercise object { cells, maxWeight, side } back into
+ * a raw row array matching the same shape used in workoutData.json, e.g.
+ * ["Lat Pulldown", "3", "8-12", 50, "Both"]. Used for exporting data.
+ */
+function exerciseToArrayRow(day, ex) {
+    const { lastColIndex, isWeightColumn } = getColumnMeta(day);
+    const row = ex.cells.slice(0, day.columns.length);
+
+    if (isWeightColumn) {
+        const weightNum = (ex.maxWeight !== "" && !isNaN(Number(ex.maxWeight)))
+            ? Number(ex.maxWeight)
+            : 0;
+        row[lastColIndex] = weightNum;
+        row.push(ex.side === "one" ? "One Side" : "Both");
+    }
+
+    return row;
+}
+
+function getDayData(day) {
+    const key = getDayKey(day.id);
     const saved = localStorage.getItem(key);
+    const defaultExercises = day.exercises;
 
     if (saved) {
         const parsed = JSON.parse(saved);
 
-        /* ---------- Migrate old format ---------- */
-        // لو لسه بنفس الفورمات القديم (array of arrays)
-        if (Array.isArray(parsed)) {
+        /* ---------- Migrate old format (array of arrays) ---------- */
+        if (Array.isArray(parsed) && parsed.length > 0 && Array.isArray(parsed[0])) {
             return parsed.map((ex) => {
-                // لو العنصر array قديم → حوّله لـ object
                 if (Array.isArray(ex)) {
-                    return {
-                        cells: [...ex],
-                        maxWeight: "",
-                        side: "both"
-                    };
+                    return arrayRowToExercise(day, ex);
                 }
                 return ex;
+            });
+        }
+
+        /* ---------- Migrate old format (array of objects without cells) ---------- */
+        if (Array.isArray(parsed) && parsed.length > 0 && !parsed[0].cells) {
+            return parsed.map((ex) => {
+                let maxWeight = ex.maxWeight || "";
+                let side = ex.side || "both";
+                let cells = ex.cells || [];
+                if (cells.length === 0 && Array.isArray(ex)) {
+                    cells = [...ex];
+                }
+                return { cells, maxWeight, side };
             });
         }
 
         return parsed;
     }
 
-    // Deep copy من الـ default + تحويل لـ object format
+    /* ---------- New JSON format: objects with cells, maxWeight, side ---------- */
+    if (defaultExercises.length > 0 && typeof defaultExercises[0] === 'object' && defaultExercises[0].cells) {
+        return defaultExercises.map((ex) => ({
+            cells: [...ex.cells],
+            maxWeight: ex.maxWeight || "",
+            side: ex.side || "both"
+        }));
+    }
+
+    /* ---------- Row format: [name, sets, reps, weight, side] ---------- */
     return defaultExercises.map((ex) => {
         if (Array.isArray(ex)) {
-            return {
-                cells: [...ex],
-                maxWeight: "",
-                side: "both"
-            };
+            return arrayRowToExercise(day, ex);
         }
-        return { cells: [...ex.cells], maxWeight: ex.maxWeight || "", side: ex.side || "both" };
+        return {
+            cells: [...(ex.cells || [])],
+            maxWeight: ex.maxWeight || "",
+            side: ex.side || "both"
+        };
     });
 }
 
-function saveDayData(programId, dayIndex, exercises) {
-    localStorage.setItem(getDayKey(programId, dayIndex), JSON.stringify(exercises));
+function saveDayData(dayId, exercises) {
+    localStorage.setItem(getDayKey(dayId), JSON.stringify(exercises));
 }
 
 /* ============================
@@ -78,16 +166,15 @@ function createModal() {
     document.getElementById("modal-cancel").addEventListener("click", closeModal);
 }
 
-function openModal(programId, dayIndex, exerciseIndex, columns, defaultCells) {
+function openModal(dayId, exerciseIndex, columns, defaultCells) {
     let modal = document.getElementById("edit-modal");
     if (!modal) {
         createModal();
         modal = document.getElementById("edit-modal");
     }
 
-    const program = workoutData.programs.find(p => p.id === programId);
-    const day = program.days[parseInt(dayIndex)];
-    const exercises = getDayData(programId, parseInt(dayIndex), day.exercises);
+    const day = appData.days.find(d => d.id === dayId);
+    const exercises = getDayData(day);
     const row = exercises[exerciseIndex];
 
     const fieldsContainer = document.getElementById("modal-fields");
@@ -97,7 +184,6 @@ function openModal(programId, dayIndex, exerciseIndex, columns, defaultCells) {
     const isWeightColumn = columns[lastColIndex].includes("Max Weight");
 
     columns.forEach((col, index) => {
-        // تخطى عمود الوزن
         if (isWeightColumn && index === lastColIndex) return;
 
         const label = document.createElement("label");
@@ -121,8 +207,7 @@ function openModal(programId, dayIndex, exerciseIndex, columns, defaultCells) {
             row.cells[parseInt(inp.dataset.index)] = inp.value;
         });
 
-        // ✅ حفظ في مصدر واحد
-        saveDayData(programId, dayIndex, exercises);
+        saveDayData(dayId, exercises);
         closeModal();
         render();
     };
@@ -140,19 +225,22 @@ function closeModal() {
 ============================ */
 
 function render() {
+    if (!appData) return;
+
     document.getElementById("startDate").textContent =
-        `📅 Started: ${START_DATE}`;
+        `📅 Started: ${appData.START_DATE}`;
 
     /* ---------- Tabs ---------- */
     const tabsContainer = document.getElementById("tabs");
     tabsContainer.innerHTML = "";
 
-    workoutData.programs.forEach((program, index) => {
+    appData.days.forEach((day, index) => {
         const btn = document.createElement("button");
-        btn.className = "tab-btn" + (index === currentProgramIndex ? " active" : "");
-        btn.textContent = program.tabName;
+        btn.className = "tab-btn" + (index === currentDayIndex ? " active" : "");
+        btn.className += ['pull', 'push', 'legs'].includes(day.id) ? " core-day " : ''
+        btn.textContent = day.day;
         btn.onclick = () => {
-            currentProgramIndex = index;
+            currentDayIndex = index;
             render();
         };
         tabsContainer.appendChild(btn);
@@ -162,142 +250,134 @@ function render() {
     const content = document.getElementById("content");
     content.innerHTML = "";
 
-    const program = workoutData.programs[currentProgramIndex];
+    const day = appData.days[currentDayIndex];
+    const exercises = getDayData(day);
 
-    program.days.forEach((day, dayIndex) => {
-        const card = document.createElement("div");
-        card.className = "day-card";
+    const card = document.createElement("div");
+    card.className = "day-card";
 
-        // نجيب التمارين من LocalStorage أو الـ Default
-        const exercises = getDayData(program.id, dayIndex, day.exercises);
-
-        const headerHTML = `
-            <div class="day-header">
-                <div class="day-icon">${day.icon}</div>
-                <div>
-                    <div class="day-title">${day.day}: ${day.title}</div>
-                    <div class="day-subtitle">${exercises.length} exercises</div>
-                </div>
+    const headerHTML = `
+        <div class="day-header">
+            <div class="day-icon">${day.icon}</div>
+            <div>
+                <div class="day-title">${day.day}: ${day.title}</div>
+                <div class="day-subtitle">${exercises.length} exercises</div>
             </div>
-        `;
+        </div>
+    `;
 
-        let tableHTML = `
-            <table class="exercise-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-        `;
+    let tableHTML = `
+        <table class="exercise-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+    `;
 
-        day.columns.forEach(col => {
-            tableHTML += `<th>${col}</th>`;
-        });
+    day.columns.forEach(col => {
+        tableHTML += `<th>${col}</th>`;
+    });
+
+    tableHTML += `
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    const lastColIndex = day.columns.length - 1;
+    const isWeightColumn = day.columns[lastColIndex].includes("Max Weight");
+
+    exercises.forEach((ex, exerciseIndex) => {
+        const row = ex;
+        const cells = row.cells;
+
+        tableHTML += "<tr>";
 
         tableHTML += `
-                    </tr>
-                </thead>
-                <tbody>
+            <td data-label="#">
+                <span class="exercise-number">${exerciseIndex + 1}</span>
+            </td>
         `;
 
-        const lastColIndex = day.columns.length - 1;
-        const isWeightColumn = day.columns[lastColIndex].includes("Max Weight");
+        cells.forEach((cell, columnIndex) => {
+            let className = "";
+            let cellContent = cell;
 
-        exercises.forEach((ex, exerciseIndex) => {
-            const row = ex; // ex is now { cells, maxWeight, side }
-            const cells = row.cells;
-
-            tableHTML += "<tr>";
-
-            tableHTML += `
-                <td data-label="#">
-                    <span class="exercise-number">${exerciseIndex + 1}</span>
-                </td>
-            `;
-
-            cells.forEach((cell, columnIndex) => {
-                let className = "";
-                let cellContent = cell;
-
-                /* ========= Exercise Name ========= */
-                if (columnIndex === 0) {
-                    className = "exercise-name";
-                    cellContent = `
-                        <div class="exercise-wrapper">
-                            <span class="exercise-text">${cell}</span>
-                            <div class="row-actions">
-                                <button
-                                    class="edit-btn"
-                                    data-program="${program.id}"
-                                    data-day="${dayIndex}"
-                                    data-exercise="${exerciseIndex}">
-                                    ✏️
-                                </button>
-                                <button
-                                    class="delete-btn"
-                                    data-program="${program.id}"
-                                    data-day="${dayIndex}"
-                                    data-exercise="${exerciseIndex}">
-                                    🗑️
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-                /* ========= Sets ========= */
-                else if (columnIndex === 1 && day.columns.length >= 3) {
-                    className = "sets-cell";
-                    cellContent = `<span class="sets-badge">${cell}</span>`;
-                }
-                /* ========= Reps ========= */
-                else if (columnIndex === 2 && day.columns.length === 4) {
-                    className = "reps-cell";
-                    cellContent = `<span class="reps-badge">${cell}</span>`;
-                }
-                /* ========= Weight ========= */
-                else if (columnIndex === lastColIndex && isWeightColumn) {
-                    cellContent = `
-                        <div class="side-toggle-wrapper">
-                            <input
-                                type="number"
-                                class="weight-input"
-                                data-program="${program.id}"
-                                data-day="${dayIndex}"
-                                data-exercise="${exerciseIndex}"
-                                value="${row.maxWeight || ""}"
-                                placeholder="0"
-                                step="0.5"
-                                min="0">
+            /* ========= Exercise Name ========= */
+            if (columnIndex === 0) {
+                className = "exercise-name";
+                cellContent = `
+                    <div class="exercise-wrapper">
+                        <span class="exercise-text">${cell}</span>
+                        <div class="row-actions">
                             <button
-                                class="side-btn ${row.side === "both" ? "both" : "one"}"
-                                data-program="${program.id}"
-                                data-day="${dayIndex}"
+                                class="edit-btn"
+                                data-day="${day.id}"
                                 data-exercise="${exerciseIndex}">
-                                ${row.side === "both" ? "Both" : "1 Side"}
+                                ✏️
+                            </button>
+                            <button
+                                class="delete-btn"
+                                data-day="${day.id}"
+                                data-exercise="${exerciseIndex}">
+                                🗑️
                             </button>
                         </div>
-                    `;
-                }
-
-                tableHTML += `
-                    <td data-label="${day.columns[columnIndex]}" class="${className}">
-                        ${cellContent}
-                    </td>
+                    </div>
                 `;
-            });
+            }
+            /* ========= Sets ========= */
+            else if (columnIndex === 1 && day.columns.length >= 3) {
+                className = "sets-cell";
+                cellContent = `<span class="sets-badge">${cell}</span>`;
+            }
+            /* ========= Reps ========= */
+            else if (columnIndex === 2 && day.columns.length === 4) {
+                className = "reps-cell";
+                cellContent = `<span class="reps-badge">${cell}</span>`;
+            }
+            /* ========= Weight ========= */
+            else if (columnIndex === lastColIndex && isWeightColumn) {
+                cellContent = `
+                    <div class="side-toggle-wrapper">
+                        <input
+                            type="number"
+                            class="weight-input"
+                            data-day="${day.id}"
+                            data-exercise="${exerciseIndex}"
+                            value="${row.maxWeight || ""}"
+                            placeholder="0"
+                            step="0.5"
+                            min="0">
+                        <button
+                            class="side-btn ${row.side === "both" ? "both" : "one"}"
+                            data-day="${day.id}"
+                            data-exercise="${exerciseIndex}">
+                            ${row.side === "both" ? "Both" : "1 Side"}
+                        </button>
+                    </div>
+                `;
+            }
 
-            tableHTML += "</tr>";
+            tableHTML += `
+                <td data-label="${day.columns[columnIndex]}" class="${className}">
+                    ${cellContent}
+                </td>
+            `;
         });
 
-        tableHTML += `
-                </tbody>
-            </table>
-            <button class="add-exercise-btn" data-program="${program.id}" data-day="${dayIndex}">
-                + Add Exercise
-            </button>
-        `;
-
-        card.innerHTML = headerHTML + tableHTML;
-        content.appendChild(card);
+        tableHTML += "</tr>";
     });
+
+    tableHTML += `
+            </tbody>
+        </table>
+        <button class="add-exercise-btn" data-day="${day.id}">
+            + Add Exercise
+        </button>
+    `;
+
+    card.innerHTML = headerHTML + tableHTML;
+    content.appendChild(card);
 }
 
 /* ============================
@@ -308,15 +388,14 @@ document.addEventListener("input", e => {
     if (!e.target.classList.contains("weight-input")) return;
 
     const input = e.target;
-    const program = workoutData.programs.find(p => p.id === input.dataset.program);
-    const day = program.days[parseInt(input.dataset.day)];
-    const exercises = getDayData(program.id, parseInt(input.dataset.day), day.exercises);
+    const dayId = input.dataset.day;
+    const day = appData.days.find(d => d.id === dayId);
+    const exercises = getDayData(day);
 
     const row = exercises[parseInt(input.dataset.exercise)];
     row.maxWeight = input.value;
 
-    // ✅ حفظ في مصدر واحد
-    saveDayData(program.id, parseInt(input.dataset.day), exercises);
+    saveDayData(dayId, exercises);
 });
 
 /* ============================
@@ -328,34 +407,30 @@ document.addEventListener("click", e => {
     /* ---------- Edit Row ---------- */
     const editBtn = e.target.closest(".edit-btn");
     if (editBtn) {
-        const programId = editBtn.dataset.program;
-        const dayIndex = parseInt(editBtn.dataset.day);
+        const dayId = editBtn.dataset.day;
         const exerciseIndex = parseInt(editBtn.dataset.exercise);
 
-        const program = workoutData.programs.find(p => p.id === programId);
-        const day = program.days[dayIndex];
-        const exercises = getDayData(programId, dayIndex, day.exercises);
+        const day = appData.days.find(d => d.id === dayId);
+        const exercises = getDayData(day);
         const defaultCells = exercises[exerciseIndex].cells;
 
-        openModal(programId, dayIndex, exerciseIndex, day.columns, defaultCells);
+        openModal(dayId, exerciseIndex, day.columns, defaultCells);
         return;
     }
 
     /* ---------- Delete Row ---------- */
     const deleteBtn = e.target.closest(".delete-btn");
     if (deleteBtn) {
-        const programId = deleteBtn.dataset.program;
-        const dayIndex = parseInt(deleteBtn.dataset.day);
+        const dayId = deleteBtn.dataset.day;
         const exerciseIndex = parseInt(deleteBtn.dataset.exercise);
 
         if (!confirm("Are you sure you want to delete this exercise?")) return;
 
-        const program = workoutData.programs.find(p => p.id === programId);
-        const day = program.days[dayIndex];
-        const exercises = getDayData(programId, dayIndex, day.exercises);
+        const day = appData.days.find(d => d.id === dayId);
+        const exercises = getDayData(day);
 
         exercises.splice(exerciseIndex, 1);
-        saveDayData(programId, dayIndex, exercises);
+        saveDayData(dayId, exercises);
 
         render();
         return;
@@ -364,14 +439,11 @@ document.addEventListener("click", e => {
     /* ---------- Add Exercise ---------- */
     const addBtn = e.target.closest(".add-exercise-btn");
     if (addBtn) {
-        const programId = addBtn.dataset.program;
-        const dayIndex = parseInt(addBtn.dataset.day);
+        const dayId = addBtn.dataset.day;
 
-        const program = workoutData.programs.find(p => p.id === programId);
-        const day = program.days[dayIndex];
-        const exercises = getDayData(programId, dayIndex, day.exercises);
+        const day = appData.days.find(d => d.id === dayId);
+        const exercises = getDayData(day);
 
-        // صف فاضى بعدد الأعمدة (object format)
         const emptyRow = {
             cells: new Array(day.columns.length).fill(""),
             maxWeight: "",
@@ -379,7 +451,7 @@ document.addEventListener("click", e => {
         };
         exercises.push(emptyRow);
 
-        saveDayData(programId, dayIndex, exercises);
+        saveDayData(dayId, exercises);
         render();
         return;
     }
@@ -388,25 +460,20 @@ document.addEventListener("click", e => {
     const sideBtn = e.target.closest(".side-btn");
     if (!sideBtn) return;
 
-    const program = workoutData.programs.find(p => p.id === sideBtn.dataset.program);
-    const day = program.days[parseInt(sideBtn.dataset.day)];
-    const exercises = getDayData(program.id, parseInt(sideBtn.dataset.day), day.exercises);
+    const dayId = sideBtn.dataset.day;
+    const day = appData.days.find(d => d.id === dayId);
+    const exercises = getDayData(day);
 
     const row = exercises[parseInt(sideBtn.dataset.exercise)];
     row.side = row.side === "both" ? "one" : "both";
 
-    // ✅ حفظ في مصدر واحد
-    saveDayData(
-        sideBtn.dataset.program,
-        parseInt(sideBtn.dataset.day),
-        exercises
-    );
-
+    saveDayData(dayId, exercises);
     render();
 });
 
 /* ============================
    Start
 ============================ */
-
-render();
+loadData().then(() => {
+    render();
+});
