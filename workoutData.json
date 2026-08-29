@@ -12,64 +12,7 @@
                 "Reps",
                 "Max Weight"
             ],
-            "exercises": [
-                [
-                    "Lat Pulldown",
-                    "3",
-                    "8-12",
-                    50,
-                    "Both"
-                ],
-                [
-                    "Seated Cable Row",
-                    "3",
-                    "8-12",
-                    45,
-                    "Both"
-                ],
-                [
-                    "Hyperextensions (Lower Back)",
-                    "2",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Reverse Pec Deck Fly (Rear Delts)",
-                    "3",
-                    "12-15",
-                    45,
-                    "Both"
-                ],
-                [
-                    "Cable Bicep Curls",
-                    "3",
-                    "8-12",
-                    35,
-                    "Both"
-                ],
-                [
-                    "Cable Hammer Curls",
-                    "2",
-                    "10-12",
-                    35,
-                    "Both"
-                ],
-                [
-                    "Dumbbell Shrugs (Traps)",
-                    "2",
-                    "10-12",
-                    20,
-                    "One Side"
-                ],
-                [
-                    "Dead Hang",
-                    "2",
-                    "30-90 sec",
-                    0,
-                    "Both"
-                ]
-            ]
+            "exercises": []
         },
         {
             "id": "push",
@@ -82,64 +25,7 @@
                 "Reps",
                 "Max Weight"
             ],
-            "exercises": [
-                [
-                    "Incline Bench Press",
-                    "3",
-                    "6-10",
-                    10,
-                    "One Side"
-                ],
-                [
-                    "Chest Fly Machine",
-                    "3",
-                    "8-12",
-                    45,
-                    "Both"
-                ],
-                [
-                    "Machine Overhead Press",
-                    "2",
-                    "8-12",
-                    50,
-                    "Both"
-                ],
-                [
-                    "Dumbbell Lateral Raises",
-                    "3",
-                    "12-15",
-                    10,
-                    "One Side"
-                ],
-                [
-                    "Triceps Pushdown (Cable)",
-                    "3",
-                    "10-12",
-                    35,
-                    "Both"
-                ],
-                [
-                    "Overhead Triceps Extension (Cable)",
-                    "2",
-                    "10-12",
-                    45,
-                    "Both"
-                ],
-                [
-                    "Cable Crunches",
-                    "2",
-                    "15-20",
-                    55,
-                    "Both"
-                ],
-                [
-                    "Side Plank",
-                    "1 Each Side",
-                    "30-90 sec",
-                    0,
-                    "Both"
-                ]
-            ]
+            "exercises": []
         },
         {
             "id": "legs",
@@ -152,64 +38,7 @@
                 "Reps",
                 "Max Weight"
             ],
-            "exercises": [
-                [
-                    "Leg Press",
-                    "3",
-                    "8-12",
-                    50,
-                    "Both"
-                ],
-                [
-                    "Romanian Deadlift",
-                    "3",
-                    "8-12",
-                    15,
-                    "One Side"
-                ],
-                [
-                    "Leg Extensions (Quad Machine)",
-                    "2",
-                    "10-12",
-                    55,
-                    "Both"
-                ],
-                [
-                    "Seated/Lying Leg Curls (Hamstring Machine)",
-                    "2",
-                    "10-12",
-                    40,
-                    "Both"
-                ],
-                [
-                    "Calf Raises (Machine)",
-                    "2",
-                    "12-15",
-                    15,
-                    "One Side"
-                ],
-                [
-                    "Pallof Press",
-                    "1 Each Side",
-                    "12-15 => 1-3 sec",
-                    15,
-                    "Both"
-                ],
-                [
-                    "Plank",
-                    "2",
-                    "30-90 sec",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Kneeling Hip Flexor Stretch",
-                    "1",
-                    "45 sec",
-                    0,
-                    "Both"
-                ]
-            ]
+            "exercises": []
         },
         {
             "id": "fullbody",
@@ -261,64 +90,7 @@
                 "Reps",
                 "Max Weight"
             ],
-            "exercises": [
-                [
-                    "Push-ups",
-                    "3",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Backpack Rows",
-                    "3",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Backpack Overhead Press",
-                    "2",
-                    "10-12",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Lateral Raises",
-                    "3",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Reverse Snow Angels",
-                    "3",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Bench/Chair Dips",
-                    "3",
-                    "10-12",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Backpack Hammer Curls",
-                    "3",
-                    "10-12",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Bicycle Crunches",
-                    "3",
-                    "15-20",
-                    0,
-                    "Both"
-                ]
-            ]
+            "exercises": []
         },
         {
             "id": "homelower",
@@ -331,57 +103,7 @@
                 "Reps",
                 "Max Weight"
             ],
-            "exercises": [
-                [
-                    "Weighted Backpack Squats",
-                    "3",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Backpack Romanian Deadlifts (RDL)",
-                    "3",
-                    "10-12",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Weighted Backpack Lunges",
-                    "2",
-                    "10-12",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Superman Hold",
-                    "3",
-                    "30-45 sec",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Backpack Glute Bridges",
-                    "2",
-                    "12-15",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Backpack Calf Raises",
-                    "3",
-                    "15-20",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Plank",
-                    "3",
-                    "30-60 sec",
-                    0,
-                    "Both"
-                ]
-            ]
+            "exercises": []
         },
         {
             "id": "homestretchs",
@@ -394,57 +116,7 @@
                 "Reps",
                 "Max Weight"
             ],
-            "exercises": [
-                [
-                    "Kneeling Quad Stretch",
-                    "2",
-                    "45 sec / leg",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Seated Hamstring Stretch",
-                    "2",
-                    "45 sec",
-                    0,
-                    "Both"
-                ],
-                [
-                    "90/90 Stretch",
-                    "2",
-                    "45 sec / side",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Cobra Pose",
-                    "2",
-                    "45 sec",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Child's Pose",
-                    "2",
-                    "45 sec",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Doorway Chest Stretch",
-                    "2",
-                    "45 sec",
-                    0,
-                    "Both"
-                ],
-                [
-                    "Cross-Body Shoulder Stretch",
-                    "2",
-                    "45 sec / arm",
-                    0,
-                    "Both"
-                ]
-            ]
+            "exercises": []
         }
     ]
 }
