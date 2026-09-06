@@ -713,3 +713,16 @@ body {
 .app-footer a:hover {
   text-decoration: underline;
 }
+
+.edit-start-btn {
+  background: none;
+  border: none;
+  color: #ff9a3c;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 8px;
+  transition: 0.2s;
+}
+.edit-start-btn:hover {
+  transform: scale(1.2);
+}

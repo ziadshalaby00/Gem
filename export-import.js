@@ -78,6 +78,7 @@ function importData(file) {
 
         if (importedObj.START_DATE) {
             appData.START_DATE = importedObj.START_DATE;
+            saveStartDate(appData.START_DATE);
         }
 
         render();

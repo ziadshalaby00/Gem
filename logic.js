@@ -1,6 +1,14 @@
 let currentDayIndex = 0;
 let appData = null;
 
+function saveStartDate(date) {
+    localStorage.setItem('workout_start_date', date);
+}
+
+function loadStartDate() {
+    return localStorage.getItem('workout_start_date');
+}
+
 /* ============================
    Load JSON Data
 ============================ */
@@ -12,6 +20,12 @@ async function loadData() {
             throw new Error('Failed to load workoutData.json');
         }
         appData = await response.json();
+        const savedStartDate = loadStartDate();
+        if (savedStartDate) {
+            appData.START_DATE = savedStartDate;
+        } else {
+            saveStartDate(appData.START_DATE);
+        }
     } catch (err) {
         console.error('Error loading JSON:', err);
         alert("I can't read the workoutData.json file, make sure it exists!");
@@ -227,8 +241,8 @@ function closeModal() {
 function render() {
     if (!appData) return;
 
-    document.getElementById("startDate").textContent =
-        `📅 Started: ${appData.START_DATE}`;
+    document.getElementById("startDate").innerHTML = 
+    `📅 Started: ${appData.START_DATE} <button class="edit-start-btn" id="edit-start-btn">✏️</button>`;
 
     /* ---------- Tabs ---------- */
     const tabsContainer = document.getElementById("tabs");
@@ -379,6 +393,17 @@ function render() {
     card.innerHTML = headerHTML + tableHTML;
     content.appendChild(card);
 }
+
+document.addEventListener("click", function(e) {
+    if (e.target && e.target.id === "edit-start-btn") {
+        const newDate = prompt("Enter new start date (DD/MM/YYYY):", appData.START_DATE);
+        if (newDate && newDate.trim() !== "") {
+            appData.START_DATE = newDate.trim();
+            saveStartDate(appData.START_DATE);
+            render();
+        }
+    }
+});
 
 /* ============================
    Weight Input
