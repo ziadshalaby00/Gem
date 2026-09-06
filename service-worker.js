@@ -1,4 +1,4 @@
-const CACHE_NAME = "workout-v1";
+const CACHE_NAME = "workout-v2";
 
 const FILES = [
     "/",

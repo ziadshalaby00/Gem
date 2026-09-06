@@ -384,7 +384,7 @@ function render() {
    Weight Input
 ============================ */
 
-document.addEventListener("input", e => {
+document.addEventListener("change", e => {
     if (!e.target.classList.contains("weight-input")) return;
 
     const input = e.target;
