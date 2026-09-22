@@ -8,7 +8,7 @@ let appData = null;
 const ICONS = {
     dumbbell: `<line x1="9" y1="12" x2="15" y2="12" stroke-width="2.5"/><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="6" y="7" width="3" height="10" rx="1"/><rect x="15" y="7" width="3" height="10" rx="1"/>`,
     rocket: `<path d="M12 2c-2 3-3 6-3 9 0 2 1 4 3 6 2-2 3-4 3-6 0-3-1-6-3-9z"/><circle cx="12" cy="9" r="1.5"/><path d="M9 17c-1 1-2 3-2 5 2 0 4-1 5-2"/><path d="M15 17c1 1 2 3 2 5-2 0-4-1-5-2"/>`,
-    legs: `<circle cx="8" cy="4" r="2"/><path d="M8 6v7l3 4 1 5"/><path d="M8 11l-3 3-2 5"/><path d="M8 13l4-2 4 1 3 4"/>`,
+    legs: `<path d="M15 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M5 20l5 -.5l1 -2"/><path d="M18 20v-5h-5.5l2.5 -6.5l-5.5 1l1.5 2"/>`,
     'full-body': `<circle cx="12" cy="4" r="2"/><path d="M12 6v6M8 9h8M12 12l-3 8M12 12l3 8"/>`,
     home: `<path d="M3 10l9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M10 20v-6h4v6"/>`,
     stretch: `<circle cx="12" cy="4" r="2"/><path d="M12 6v8M6 10l6-2 6 2M9 20l3-6 3 6"/>`,
