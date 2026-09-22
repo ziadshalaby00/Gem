@@ -726,3 +726,20 @@ body {
 .edit-start-btn:hover {
   transform: scale(1.2);
 }
+
+.start-date-input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.start-date-input:focus {
+  outline: none;
+  border-color: #ff9a3c;
+}

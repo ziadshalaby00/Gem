@@ -10,6 +10,27 @@ function loadStartDate() {
 }
 
 /* ============================
+   Date Format Helpers
+   (storage/export stays DD/MM/YYYY, <input type="date"> needs YYYY-MM-DD)
+============================ */
+
+function ddmmyyyyToISO(str) {
+    if (!str) return '';
+    const parts = str.split('/');
+    if (parts.length !== 3) return '';
+    const [dd, mm, yyyy] = parts;
+    if (!/^\d+$/.test(dd) || !/^\d+$/.test(mm) || !/^\d{4}$/.test(yyyy)) return '';
+    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+}
+
+function isoToDDMMYYYY(iso) {
+    const parts = iso.split('-');
+    if (parts.length !== 3) return '';
+    const [yyyy, mm, dd] = parts;
+    return `${dd}/${mm}/${yyyy}`;
+}
+
+/* ============================
    Load JSON Data
 ============================ */
 
@@ -241,8 +262,12 @@ function closeModal() {
 function render() {
     if (!appData) return;
 
-    document.getElementById("startDate").innerHTML = 
-    `📅 Started: ${appData.START_DATE} <button class="edit-start-btn" id="edit-start-btn">✏️</button>`;
+    const isoStartDate = ddmmyyyyToISO(appData.START_DATE);
+    document.getElementById("startDate").innerHTML = `
+        📅 Started:
+        <input type="date" id="start-date-input" class="start-date-input" value="${isoStartDate}">
+    `;
+
 
     /* ---------- Tabs ---------- */
     const tabsContainer = document.getElementById("tabs");
@@ -394,14 +419,14 @@ function render() {
     content.appendChild(card);
 }
 
-document.addEventListener("click", function(e) {
-    if (e.target && e.target.id === "edit-start-btn") {
-        const newDate = prompt("Enter new start date (DD/MM/YYYY):", appData.START_DATE);
-        if (newDate && newDate.trim() !== "") {
-            appData.START_DATE = newDate.trim();
-            saveStartDate(appData.START_DATE);
-            render();
-        }
+document.addEventListener("change", e => {
+    if (e.target && e.target.id === "start-date-input") {
+        const iso = e.target.value;
+        if (!iso) return;
+
+        appData.START_DATE = isoToDDMMYYYY(iso);
+        saveStartDate(appData.START_DATE);
+        render();
     }
 });
 
