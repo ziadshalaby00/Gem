@@ -75,7 +75,8 @@ async function importData(file) {
 
         const ok = await showConfirm(
             "This will completely replace your current data with the contents of this file. Continue?",
-            "Replace Data"
+            "Replace Data",
+            true
         );
         if (!ok) return;
 

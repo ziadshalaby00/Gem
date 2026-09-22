@@ -44,9 +44,11 @@ function showPopup({ title = '', message = '', type = 'info', buttons = [] } = {
         const iconName = type === 'warning' ? 'warning' : type === 'success' ? 'check' : 'info';
         const iconClass = type === 'warning' ? 'popup-icon-warning' : type === 'success' ? 'popup-icon-success' : 'popup-icon-info';
 
-        const buttonsHtml = buttons.map((btn, i) =>
-            `<button class="popup-btn ${btn.primary ? 'popup-btn-primary' : 'popup-btn-secondary'}" data-value="${i}">${btn.text}</button>`
-        ).join('');
+        const buttonsHtml = buttons.map((btn, i) => {
+            let cls = btn.primary ? 'popup-btn-primary' : 'popup-btn-secondary';
+            if (btn.danger) cls += ' popup-btn-danger';
+            return `<button class="popup-btn ${cls}" data-value="${i}">${btn.text}</button>`;
+        }).join('');
 
         modal.innerHTML = `
             <div class="modal-content popup-content">
@@ -95,12 +97,12 @@ function showSuccess(message, title = 'Success') {
     });
 }
 
-function showConfirm(message, title = 'Confirm') {
+function showConfirm(message, title = 'Confirm', danger = false) {
     return showPopup({
         title, message, type: 'warning',
         buttons: [
             { text: 'Cancel', value: false },
-            { text: 'Confirm', value: true, primary: true }
+            { text: 'Confirm', value: true, primary: true, danger }
         ]
     });
 }
@@ -434,8 +436,7 @@ document.addEventListener("click", async e => {
         const dayId = deleteBtn.dataset.day;
         const exerciseIndex = parseInt(deleteBtn.dataset.exercise);
 
-        const ok = await showConfirm("Are you sure you want to delete this exercise?", "Delete Exercise");
-        if (!ok) return;
+        const ok = await showConfirm("Are you sure you want to delete this exercise?", "Delete Exercise", true);        if (!ok) return;
 
         const day = appData.days.find(d => d.id === dayId);
         const exercises = getDayData(day);

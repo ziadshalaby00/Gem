@@ -916,6 +916,18 @@ body {
   transform: translateY(-1px);
 }
 
+.popup-btn-danger {
+  background: linear-gradient(90deg, #ff3b3b, #ff5c5c);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 59, 59, 0.35);
+}
+
+.popup-btn-danger:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 59, 59, 0.5);
+}
+
 .popup-btn-secondary {
   background: rgba(255, 255, 255, 0.08);
   color: #ccc;
