@@ -40,6 +40,27 @@ function exportData() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    if (typeof isDriveBackupEnabled === "function" && isDriveBackupEnabled()) {
+        backupToDrive();
+    }
+}
+
+function applyImportedData(importedObj) {
+    importedObj.days.forEach(importedDay => {
+        const day = appData.days.find(d => d.id === importedDay.id);
+        if (!day || !Array.isArray(importedDay.exercises)) return;
+
+        const exercises = importedDay.exercises.map(row => arrayRowToExercise(day, row));
+        saveDayData(day.id, exercises);
+    });
+
+    if (importedObj.START_DATE) {
+        appData.START_DATE = importedObj.START_DATE;
+        saveStartDate(appData.START_DATE);
+    }
+
+    render();
 }
 
 function importData(file) {
@@ -68,20 +89,7 @@ function importData(file) {
             return;
         }
 
-        importedObj.days.forEach(importedDay => {
-            const day = appData.days.find(d => d.id === importedDay.id);
-            if (!day || !Array.isArray(importedDay.exercises)) return;
-
-            const exercises = importedDay.exercises.map(row => arrayRowToExercise(day, row));
-            saveDayData(day.id, exercises);
-        });
-
-        if (importedObj.START_DATE) {
-            appData.START_DATE = importedObj.START_DATE;
-            saveStartDate(appData.START_DATE);
-        }
-
-        render();
+        applyImportedData(importedObj);
     };
 
     reader.onerror = () => {

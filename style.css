@@ -743,3 +743,56 @@ body {
   outline: none;
   border-color: #ff9a3c;
 }
+
+
+/* ---------- Google Drive Backup ---------- */
+.drive-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.drive-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a0a0b8;
+  font-size: 0.85rem;
+  max-width: 480px;
+  cursor: pointer;
+}
+
+.drive-checkbox-label input[type="checkbox"] {
+  accent-color: #ff6b35;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.drive-restore-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ff9a3c;
+  border: 2px solid rgba(255, 154, 60, 0.4);
+  font-size: 0.85rem;
+  padding: 10px 24px;
+}
+
+.drive-restore-btn:hover {
+  background: rgba(255, 154, 60, 0.1);
+  border-color: #ff9a3c;
+}
+
+.drive-status {
+  display: none;
+  font-size: 0.85rem;
+  color: #ffcc33;
+  font-weight: 600;
+}
+
+.drive-status.error {
+  color: #ff5c5c;
+}

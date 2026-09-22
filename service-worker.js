@@ -8,6 +8,7 @@ const FILES = [
     "/logic.js",
     "/style.css",
     "/export-import.js",
+    "/drive-sync.js",
 
     "/favicons/android-chrome-192x192.png",
     "/favicons/android-chrome-512x512.png",
