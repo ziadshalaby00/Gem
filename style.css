@@ -47,7 +47,9 @@ body {
 }
 
 .start-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 25px;
   background: linear-gradient(90deg, #ff6b35, #ff9a3c);
   border-radius: 50px;
@@ -129,8 +131,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.8rem;
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.day-icon svg {
+  width: 30px;
+  height: 30px;
+  color: #fff;
 }
 
 .day-title {
@@ -347,29 +356,112 @@ body {
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* Side button */
+.side-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: .25s;
+}
+
+.side-btn.one {
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+
+.side-btn.both {
+  background: linear-gradient(90deg, #ff6b35, #ff9a3c);
+  color: white;
+}
+
+/* Exercise wrapper & row actions */
+.exercise-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Edit button */
+.edit-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #ff9a3c;
+  opacity: 0.7;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn:hover {
+  opacity: 1;
+  background: rgba(255, 154, 60, 0.12);
+}
+
+/* Delete button (RED) */
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #ff5c5c;
+  opacity: 0.7;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  background: rgba(255, 92, 92, 0.12);
+}
+
+/* SVG icon base */
+.icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header h1 { font-size: 2rem; }
   .day-card { padding: 20px; }
   .day-title { font-size: 1.3rem; }
-  .day-icon { width: 50px; height: 50px; font-size: 1.5rem; }
-  
+  .day-icon { width: 50px; height: 50px; }
+  .day-icon svg { width: 26px; height: 26px; }
+
   .exercise-table, .exercise-table thead, .exercise-table tbody,
   .exercise-table th, .exercise-table td, .exercise-table tr {
     display: block;
   }
-  
+
   .exercise-table thead {
     display: none;
   }
-  
+
   .exercise-table tbody tr {
     margin-bottom: 15px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 10px;
   }
-  
+
   .exercise-table td {
     padding: 8px 15px;
     text-align: left;
@@ -377,7 +469,7 @@ body {
     position: relative;
     padding-left: 45%;
   }
-  
+
   .exercise-table td::before {
     content: attr(data-label);
     position: absolute;
@@ -400,58 +492,17 @@ body {
     gap: 6px;
   }
 
-  .side-btn{
+  .side-btn {
     margin-left: 10%;
   }
 }
 
-.side-btn{
-  padding:6px 14px;
-  border:none;
-  border-radius:20px;
-  cursor:pointer;
-  font-weight:600;
-  transition:.25s;
-}
-
-.side-btn.one{
-  background:rgba(255,255,255,.08);
-  color:#fff;
-}
-
-.side-btn.both{
-  background:linear-gradient(90deg,#ff6b35,#ff9a3c);
-  color:white;
-}
-
-
-.exercise-wrapper{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  flex-wrap: wrap;
-}
-
-.edit-btn{
-  background:none;
-  border:none;
-  cursor:pointer;
-  font-size:16px;
-  opacity:.6;
-  transition:.2s;
-}
-
-.edit-btn:hover{
-  opacity:1;
-  transform:scale(1.1);
-}
-
+/* Modal (Edit Row) */
 .modal {
   display: none;
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -465,12 +516,18 @@ body {
   width: 100%;
   max-width: 420px;
   color: #fff;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .modal-content h3 {
   margin: 0 0 16px 0;
   font-size: 1.2rem;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .modal-content label {
@@ -511,6 +568,7 @@ body {
   font-size: 1rem;
   cursor: pointer;
   font-weight: 600;
+  font-family: inherit;
 }
 
 .save-btn {
@@ -523,28 +581,15 @@ body {
   color: #ccc;
 }
 
-/* ---------- Row Actions (Edit + Delete) ---------- */
-.row-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
+.cancel-btn:hover {
+  filter: brightness(1.06);
 }
 
-.delete-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 4px;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+.save-btn:hover {
+  filter: brightness(0.94);
 }
 
-.delete-btn:hover {
-  opacity: 1;
-}
-
-/* ---------- Add Exercise Button ---------- */
+/* Add Exercise Button */
 .add-exercise-btn {
   width: 100%;
   margin-top: 14px;
@@ -557,6 +602,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
 .add-exercise-btn:hover {
@@ -565,7 +611,7 @@ body {
   border-style: solid;
 }
 
-/* ---------- Data Actions (Export / Import) ---------- */
+/* Data Actions (Export / Import) */
 .data-actions {
   display: flex;
   justify-content: center;
@@ -588,6 +634,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  font-family: inherit;
 }
 
 .export-btn {
@@ -623,78 +670,67 @@ body {
     align-items: stretch;
     padding: 0 10px;
   }
-  
+
   .data-btn {
     width: 100%;
     justify-content: center;
   }
 }
 
-/* ---------- Core Day Highlight (Push / Pull / Legs) — Moving Border ---------- */
+/* Core Day Highlight — Moving Border */
 .tab-btn.core-day {
-    position: relative;
-    z-index: 0;
-    border-color: transparent;
+  position: relative;
+  z-index: 0;
+  border-color: transparent;
 }
 
-/* Animated border */
 .tab-btn.core-day::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    padding: 2px;
-    border-radius: 50px;
+  content: "";
+  position: absolute;
+  inset: -2px;
+  padding: 2px;
+  border-radius: 50px;
 
-    background: conic-gradient(
-        from var(--border-angle),
+  background: conic-gradient(
+    from var(--border-angle),
+    #ff6b35 0deg,
+    #ff6b35 260deg,
+    #ffcc33 285deg,
+    #fff4b0 300deg,
+    #ffcc33 315deg,
+    #ff6b35 340deg,
+    #ff6b35 360deg
+  );
 
-        #ff6b35 0deg,
-        #ff6b35 260deg,
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
 
-        #ffcc33 285deg,
-        #fff4b0 300deg,
-        #ffcc33 315deg,
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 
-        #ff6b35 340deg,
-        #ff6b35 360deg
-    );
+  animation: borderColorSpin 3s linear infinite;
 
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-
-    animation: borderColorSpin 3s linear infinite;
-
-    z-index: -1;
-    pointer-events: none;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .tab-btn.core-day.active::before {
-    animation-duration: 1.5s;
+  animation-duration: 1.5s;
 }
 
 @property --border-angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
 }
 
 @keyframes borderColorSpin {
-    from {
-        --border-angle: 0deg;
-    }
-
-    to {
-        --border-angle: 360deg;
-    }
+  from { --border-angle: 0deg; }
+  to { --border-angle: 360deg; }
 }
 
-
-
-/* ---------- Footer ---------- */
+/* Footer */
 .app-footer {
   text-align: center;
   padding: 24px 20px 10px;
@@ -714,19 +750,7 @@ body {
   text-decoration: underline;
 }
 
-.edit-start-btn {
-  background: none;
-  border: none;
-  color: #ff9a3c;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-left: 8px;
-  transition: 0.2s;
-}
-.edit-start-btn:hover {
-  transform: scale(1.2);
-}
-
+/* Start date input */
 .start-date-input {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -744,55 +768,159 @@ body {
   border-color: #ff9a3c;
 }
 
-
-/* ---------- Google Drive Backup ---------- */
-.drive-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.drive-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #a0a0b8;
-  font-size: 0.85rem;
-  max-width: 480px;
-  cursor: pointer;
-}
-
-.drive-checkbox-label input[type="checkbox"] {
-  accent-color: #ff6b35;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.drive-restore-btn {
-  background: rgba(255, 255, 255, 0.05);
-  color: #ff9a3c;
-  border: 2px solid rgba(255, 154, 60, 0.4);
-  font-size: 0.85rem;
-  padding: 10px 24px;
-}
-
-.drive-restore-btn:hover {
-  background: rgba(255, 154, 60, 0.1);
-  border-color: #ff9a3c;
-}
-
+/* Google Drive Backup Status */
 .drive-status {
   display: none;
+  justify-content: center;
+  align-items: center;
   font-size: 0.85rem;
   color: #ffcc33;
   font-weight: 600;
 }
 
+.drive-status.has-text {
+  display: flex;
+}
+
 .drive-status.error {
   color: #ff5c5c;
+}
+
+.drive-status svg {
+  margin-right: 4px;
+}
+
+/* Export Menu Modal */
+.export-menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.export-menu-content h3 {
+  margin-bottom: 6px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.export-option-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  border: 1px solid rgba(255, 154, 60, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.export-option-btn:hover {
+  background: rgba(255, 154, 60, 0.15);
+  border-color: #ff9a3c;
+  transform: translateY(-1px);
+}
+
+.export-menu-content .cancel-btn {
+  margin-top: 6px;
+}
+
+/* Popup Modal */
+.popup-modal {
+  z-index: 1100;
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 380px;
+  padding: 28px 24px 22px;
+}
+
+.popup-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.popup-icon-info {
+  background: rgba(255, 154, 60, 0.15);
+  color: #ff9a3c;
+}
+
+.popup-icon-warning {
+  background: rgba(255, 92, 92, 0.15);
+  color: #ff5c5c;
+}
+
+.popup-icon-success {
+  background: rgba(76, 209, 118, 0.15);
+  color: #4cd176;
+}
+
+.popup-title {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.popup-message {
+  margin: 0 0 22px 0;
+  font-size: 0.95rem;
+  color: #a0a0b8;
+  line-height: 1.5;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.popup-btn {
+  flex: 1;
+  padding: 11px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.popup-btn-primary {
+  background: linear-gradient(90deg, #ff6b35, #ff9a3c);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+.popup-btn-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.popup-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ccc;
+}
+
+.popup-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
 }

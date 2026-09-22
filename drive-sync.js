@@ -1,27 +1,21 @@
 /* ============================
-   Google Drive Backup (optional)
-   Requires export-import.js (buildExportData)
-   and logic.js (appData).
+   Google Drive Backup
 ============================ */
 
 const DRIVE_CLIENT_ID = '62916963871-8oain5dbus14mmbej6clctk0pdkrnoeh.apps.googleusercontent.com';
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const DRIVE_FILE_NAME = 'workout-backup.json';
-const DRIVE_CONSENT_KEY = 'drive_backup_enabled';
 const DRIVE_FILE_ID_KEY = 'drive_backup_file_id';
 
 let tokenClient = null;
 let driveAccessToken = null;
 let driveTokenExpiry = 0;
 let driveUploading = false;
+let pendingTokenRequest = null;
 
-function isDriveBackupEnabled() {
-    return localStorage.getItem(DRIVE_CONSENT_KEY) === 'true';
-}
-
-function setDriveBackupEnabled(enabled) {
-    localStorage.setItem(DRIVE_CONSENT_KEY, enabled ? 'true' : 'false');
-}
+/* ============================
+   Auth
+============================ */
 
 function initDriveTokenClient() {
     if (tokenClient || typeof google === 'undefined') return;
@@ -32,19 +26,12 @@ function initDriveTokenClient() {
     });
 }
 
-let pendingTokenRequest = null;
-
-function requestDriveToken(promptMode, timeoutMs = 10000) {
+function requestDriveToken(promptMode, timeoutMs = 60000) {
     if (pendingTokenRequest) return pendingTokenRequest;
 
     pendingTokenRequest = new Promise((resolve, reject) => {
         if (!tokenClient) initDriveTokenClient();
-
-        if (!tokenClient) {
-            pendingTokenRequest = null;
-            reject(new Error('GOOGLE_NOT_LOADED'));
-            return;
-        }
+        if (!tokenClient) { pendingTokenRequest = null; reject(new Error('GOOGLE_NOT_LOADED')); return; }
 
         const timer = setTimeout(() => {
             pendingTokenRequest = null;
@@ -54,11 +41,7 @@ function requestDriveToken(promptMode, timeoutMs = 10000) {
         tokenClient.callback = (response) => {
             clearTimeout(timer);
             pendingTokenRequest = null;
-
-            if (response.error) {
-                reject(response);
-                return;
-            }
+            if (response.error) { reject(response); return; }
             driveAccessToken = response.access_token;
             driveTokenExpiry = Date.now() + (response.expires_in * 1000);
             resolve(driveAccessToken);
@@ -70,36 +53,17 @@ function requestDriveToken(promptMode, timeoutMs = 10000) {
             reject(err);
         };
 
-        try {
-            tokenClient.requestAccessToken({ prompt: promptMode });
-        } catch (e) {
-            clearTimeout(timer);
-            pendingTokenRequest = null;
-            reject(e);
-        }
+        try { tokenClient.requestAccessToken({ prompt: promptMode }); }
+        catch (e) { clearTimeout(timer); pendingTokenRequest = null; reject(e); }
     });
 
     return pendingTokenRequest;
 }
 
 async function ensureDriveToken() {
-    if (driveAccessToken && Date.now() < driveTokenExpiry - 60_000) {
-        return driveAccessToken;
-    }
-
-    // 1) Silent
-    try {
-        return await requestDriveToken('none', 5000);
-    } catch (silentErr) {
-        console.warn('Silent token failed:', silentErr);
-
-        // 2) Interactive
-        try {
-            return await requestDriveToken('', 60000);
-        } catch (err) {
-            throw new Error('DRIVE_REAUTH_NEEDED');
-        }
-    }
+    if (driveAccessToken && Date.now() < driveTokenExpiry - 60_000) return driveAccessToken;
+    try { return await requestDriveToken('', 60000); }
+    catch (err) { throw new Error('DRIVE_REAUTH_NEEDED'); }
 }
 
 /* ============================
@@ -116,9 +80,10 @@ async function uploadToDrive(token, fileId, jsonData) {
         JSON.stringify(jsonData, null, 4) +
         `\r\n--${boundary}--`;
 
+    const fields = 'fields=id,name,trashed';
     const url = fileId
-        ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
-        : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+        ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&${fields}`
+        : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&${fields}`;
 
     const res = await fetch(url, {
         method: fileId ? 'PATCH' : 'POST',
@@ -129,8 +94,23 @@ async function uploadToDrive(token, fileId, jsonData) {
         body,
     });
 
-    if (!res.ok) throw new Error(`Drive upload failed: ${res.status}`);
+    if (!res.ok) {
+        const errorBody = await res.json().catch(() => null);
+        console.error('Drive upload failed:', res.status, errorBody);
+        const err = new Error(`Drive upload failed: ${res.status}`);
+        err.status = res.status;
+        throw err;
+    }
+
     const file = await res.json();
+    console.log('Drive upload response:', file);
+
+    if (file.trashed) {
+        const err = new Error('FILE_TRASHED');
+        err.status = 404;
+        throw err;
+    }
+
     localStorage.setItem(DRIVE_FILE_ID_KEY, file.id);
     return file;
 }
@@ -140,7 +120,7 @@ async function uploadToDrive(token, fileId, jsonData) {
 ============================ */
 
 async function backupToDrive() {
-    if (!appData) return;
+    if (!appData) return false;
 
     driveUploading = true;
     updateDriveStatus('Backing up to Drive...');
@@ -148,19 +128,31 @@ async function backupToDrive() {
 
     try {
         const token = await ensureDriveToken();
-        const fileId = localStorage.getItem(DRIVE_FILE_ID_KEY);
-
+        let fileId = localStorage.getItem(DRIVE_FILE_ID_KEY);
         const exportObj = buildExportData();
-        await uploadToDrive(token, fileId, exportObj);
 
-        updateDriveStatus('Backed up to Drive ✅', true);
+        try {
+            await uploadToDrive(token, fileId, exportObj);
+        } catch (err) {
+            if (err.status === 404 || err.status === 403) {
+                console.warn('Stale fileId detected, uploading as new file...');
+                localStorage.removeItem(DRIVE_FILE_ID_KEY);
+                await uploadToDrive(token, null, exportObj);
+            } else {
+                throw err;
+            }
+        }
+
+        updateDriveStatus(`${icon('check', 14)} Backed up to Drive`, true);
+        return true;
     } catch (err) {
         console.error('Drive backup failed:', err);
         if (err.message === 'DRIVE_REAUTH_NEEDED') {
-            updateDriveStatus('Drive connection expired — untick then re-tick the checkbox.', true, true);
+            updateDriveStatus('Drive sign-in cancelled or denied.', true, true);
         } else {
-            updateDriveStatus('Backup to Drive failed ⚠️', true, true);
+            updateDriveStatus(`${icon('warning', 14)} Backup to Drive failed`, true, true);
         }
+        return false;
     } finally {
         driveUploading = false;
         window.removeEventListener('beforeunload', blockUnloadIfUploading);
@@ -168,63 +160,97 @@ async function backupToDrive() {
 }
 
 function blockUnloadIfUploading(e) {
-    if (driveUploading) {
-        e.preventDefault();
-        e.returnValue = '';
-    }
+    if (driveUploading) { e.preventDefault(); e.returnValue = ''; }
 }
+
+let driveStatusTimeoutId = null;
 
 function updateDriveStatus(text, autoHide = false, isError = false) {
     const el = document.getElementById('drive-status');
     if (!el) return;
-    el.textContent = text;
+
+    if (driveStatusTimeoutId) { clearTimeout(driveStatusTimeoutId); driveStatusTimeoutId = null; }
+
+    if (!text) {
+        el.innerHTML = '';
+        el.classList.remove('has-text', 'error');
+        return;
+    }
+
+    el.innerHTML = text;
+    el.classList.add('has-text');
     el.classList.toggle('error', isError);
-    el.style.display = text ? 'inline-block' : 'none';
-    if (autoHide && text) {
-        setTimeout(() => { el.style.display = 'none'; }, 4000);
+
+    if (autoHide) {
+        driveStatusTimeoutId = setTimeout(() => {
+            el.innerHTML = '';
+            el.classList.remove('has-text', 'error');
+            driveStatusTimeoutId = null;
+        }, 4000);
     }
 }
 
 /* ============================
-   UI
+   Export Menu
+============================ */
+
+function showExportMenu() {
+    let modal = document.getElementById('export-menu-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'export-menu-modal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content export-menu-content">
+                <h3>${icon('upload', 18)} Export Options</h3>
+                <button class="export-option-btn" data-action="device">${icon('device', 18)} Export to Device</button>
+                <button class="export-option-btn" data-action="drive">${icon('cloud', 18)} Export to Drive</button>
+                <button class="export-option-btn" data-action="both">${icon('sync', 18)} Export to Both</button>
+                <button class="cancel-btn" id="export-menu-cancel">Cancel</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', e => { if (e.target === modal) closeExportMenu(); });
+        document.getElementById('export-menu-cancel').addEventListener('click', closeExportMenu);
+
+        modal.querySelectorAll('.export-option-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const action = btn.dataset.action;
+                closeExportMenu();
+
+                if (action === 'device') {
+                    await downloadExportFile();
+                } else if (action === 'drive') {
+                    await backupToDrive();
+                } else if (action === 'both') {
+                    await downloadExportFile();
+                    await backupToDrive();
+                }
+            });
+        });
+    }
+    modal.style.display = 'flex';
+}
+
+function closeExportMenu() {
+    const modal = document.getElementById('export-menu-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+/* ============================
+   Status element
 ============================ */
 
 function createDriveUI() {
-    if (document.getElementById('drive-actions')) return;
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'drive-actions';
-    wrapper.id = 'drive-actions';
-
-    wrapper.innerHTML = `
-        <label class="drive-checkbox-label">
-            <input type="checkbox" id="drive-backup-checkbox">
-            Also back up to Google Drive after each Export (sign in with Google once)
-        </label>
-        <span id="drive-status" class="drive-status"></span>
-    `;
+    if (document.getElementById('drive-status')) return;
+    const statusEl = document.createElement('span');
+    statusEl.id = 'drive-status';
+    statusEl.className = 'drive-status';
 
     const dataActions = document.getElementById('data-actions');
-    dataActions.insertAdjacentElement('afterend', wrapper);
-
-    const checkbox = document.getElementById('drive-backup-checkbox');
-    checkbox.checked = isDriveBackupEnabled();
-
-    checkbox.addEventListener('change', async (e) => {
-        if (e.target.checked) {
-            try {
-                await requestDriveToken('');
-                setDriveBackupEnabled(true);
-            } catch (err) {
-                console.error('Drive auth failed:', err);
-                e.target.checked = false;
-                setDriveBackupEnabled(false);
-                alert("Drive access wasn't granted.");
-            }
-        } else {
-            setDriveBackupEnabled(false);
-        }
-    });
+    if (dataActions) dataActions.insertAdjacentElement('afterend', statusEl);
+    else document.body.appendChild(statusEl);
 }
 
 if (document.readyState === 'loading') {

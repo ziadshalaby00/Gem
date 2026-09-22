@@ -1,122 +1,14 @@
 {
     "START_DATE": "DD/MM/YYYY",
     "days": [
-        {
-            "id": "pull",
-            "day": "Pull",
-            "title": "Pull Day",
-            "icon": "💪",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "push",
-            "day": "Push",
-            "title": "Push Day",
-            "icon": "🚀",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "legs",
-            "day": "Legs",
-            "title": "Legs Day",
-            "icon": "🦵",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "fullbody",
-            "day": "Full Body",
-            "title": "Full Body",
-            "icon": "🏋️",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "upper",
-            "day": "Upper",
-            "title": "Upper Body",
-            "icon": "💪",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "lower",
-            "day": "Lower",
-            "title": "Lower Body",
-            "icon": "🦵",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "homeupper",
-            "day": "Home Upper",
-            "title": "Home Upper",
-            "icon": "🏠",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "homelower",
-            "day": "Home Lower",
-            "title": "Home Lower",
-            "icon": "🏠",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        },
-        {
-            "id": "homestretchs",
-            "day": "Stretches",
-            "title": "Home Stretches",
-            "icon": "🧘",
-            "columns": [
-                "Exercise",
-                "Sets",
-                "Reps",
-                "Max Weight"
-            ],
-            "exercises": []
-        }
+        { "id": "pull",        "day": "Pull",        "title": "Pull Day",       "icon": "dumbbell",   "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "push",        "day": "Push",        "title": "Push Day",       "icon": "rocket",     "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "legs",        "day": "Legs",        "title": "Legs Day",       "icon": "legs",       "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "fullbody",    "day": "Full Body",   "title": "Full Body",      "icon": "full-body",  "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "upper",       "day": "Upper",       "title": "Upper Body",     "icon": "dumbbell",   "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "lower",       "day": "Lower",       "title": "Lower Body",     "icon": "legs",       "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "homeupper",   "day": "Home Upper",  "title": "Home Upper",     "icon": "home",       "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "homelower",   "day": "Home Lower",  "title": "Home Lower",     "icon": "home",       "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] },
+        { "id": "homestretchs","day": "Stretches",   "title": "Home Stretches", "icon": "stretch",    "columns": ["Exercise", "Sets", "Reps", "Max Weight"], "exercises": [] }
     ]
 }
