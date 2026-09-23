@@ -819,7 +819,7 @@ body {
   transition: all 0.2s ease;
   font-family: inherit;
   display: flex;
-  align-items: center;
+  align-items: end;
   gap: 10px;
   text-align: left;
 }
