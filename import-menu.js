@@ -155,11 +155,3 @@ async function runImportFromDrive() {
         setDriveButtonsDisabled(false);
     }
 }
-
-/* ============================
-   Status element (optional)
-============================ */
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {});
-}
