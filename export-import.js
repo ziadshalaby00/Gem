@@ -36,19 +36,56 @@ async function downloadExportFile() {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * Applies an imported backup object to the app's data.
+ *
+ * Each day is applied independently: if one day's data is malformed, it is
+ * skipped (and reported) rather than throwing and leaving the import
+ * half-applied with no indication of what happened. START_DATE is applied
+ * last and separately, so a bad day never blocks it.
+ *
+ * Returns { appliedDays, failedDays, startDateApplied } so the caller can
+ * tell the user exactly what happened.
+ */
 function applyImportedData(importedObj) {
+    const appliedDays = [];
+    const failedDays = [];
+
     importedObj.days.forEach(importedDay => {
-        const day = appData.days.find(d => d.id === importedDay.id);
-        if (!day || !Array.isArray(importedDay.exercises)) return;
-        const exercises = importedDay.exercises.map(row => arrayRowToExercise(day, row));
-        saveDayData(day.id, exercises);
+        try {
+            const day = appData.days.find(d => d.id === importedDay.id);
+            if (!day) {
+                failedDays.push(importedDay.id ?? '(unknown)');
+                return;
+            }
+            if (!Array.isArray(importedDay.exercises)) {
+                failedDays.push(day.id);
+                return;
+            }
+
+            const exercises = importedDay.exercises.map(row => arrayRowToExercise(day, row));
+            saveDayData(day.id, exercises);
+            appliedDays.push(day.id);
+        } catch (err) {
+            console.error(`Failed to import day "${importedDay && importedDay.id}":`, err);
+            failedDays.push((importedDay && importedDay.id) ?? '(unknown)');
+        }
     });
 
-    if (importedObj.START_DATE) {
-        appData.START_DATE = importedObj.START_DATE;
-        saveStartDate(appData.START_DATE);
+    let startDateApplied = false;
+    try {
+        if (importedObj.START_DATE) {
+            appData.START_DATE = importedObj.START_DATE;
+            saveStartDate(appData.START_DATE);
+            startDateApplied = true;
+        }
+    } catch (err) {
+        console.error('Failed to import START_DATE:', err);
     }
+
     render();
+
+    return { appliedDays, failedDays, startDateApplied };
 }
 
 async function importData(file) {
@@ -80,8 +117,16 @@ async function importData(file) {
         );
         if (!ok) return;
 
-        applyImportedData(importedObj);
-        await showSuccess("Your data has been imported successfully.", "Import Complete");
+        const result = applyImportedData(importedObj);
+
+        if (result.failedDays.length > 0) {
+            await showAlert(
+                `Import finished, but ${result.failedDays.length} day(s) couldn't be applied: ${result.failedDays.join(', ')}. The rest of your data was imported successfully.`,
+                "Partial Import"
+            );
+        } else {
+            await showSuccess("Your data has been imported successfully.", "Import Complete");
+        }
     };
 
     reader.onerror = async () => {
@@ -118,7 +163,8 @@ function createDataActionsUI() {
     });
 
     document.getElementById("import-btn").addEventListener("click", () => {
-        document.getElementById("import-file-input").click();
+        if (typeof showImportMenu === 'function') showImportMenu();
+        else document.getElementById("import-file-input").click();
     });
 
     document.getElementById("import-file-input").addEventListener("change", (e) => {

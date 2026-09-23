@@ -27,6 +27,7 @@ Gem/
 ├── logic.js             Core app logic: rendering, local storage, modals, popups
 ├── export-import.js      Local export/import (JSON file) logic
 ├── drive-sync.js         Optional Google Drive backup logic
+├── import-menu.js         Import source chooser (device / Drive)
 ├── style.css             All styling
 ├── workoutData.json       Default workout program data (days, exercises, columns)
 ├── manifest.json          PWA manifest (icons, theme, display mode)
@@ -91,7 +92,7 @@ In addition to local export, you can back up your data straight to Google Drive:
 - First use requires a one-time Google sign-in. The app only requests the [`drive.file`](https://developers.google.com/drive/api/guides/api-specific-auth) scope, so it can only see/edit the single backup file it creates — nothing else in your Drive.
 - Every following export updates that same file instead of creating duplicates.
 
-**Current limitation:** restoring a backup *from* Drive isn't available yet — use the local **Import** button with a downloaded backup file in the meantime.
+Restore from Drive: Click Import → Import from Drive to restore your data from the cloud backup. You'll be asked to confirm before your local data is replaced.
 
 ### Enabling it in your own deployment
 

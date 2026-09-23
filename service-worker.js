@@ -1,4 +1,4 @@
-const CACHE_NAME = "workout-v6";
+const CACHE_NAME = "workout-v7";
 
 const FILES = [
     "/",
@@ -9,6 +9,7 @@ const FILES = [
     "/style.css",
     "/export-import.js",
     "/drive-sync.js",
+    "/import-menu.js",
     "/favicons/android-chrome-192x192.png",
     "/favicons/android-chrome-512x512.png",
     "/favicons/apple-touch-icon.png",

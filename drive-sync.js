@@ -202,6 +202,19 @@ async function trashDriveFile(token, fileId) {
     }
 }
 
+async function downloadFromDrive(token, fileId) {
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+    const res = await fetchWithTimeout(url, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) {
+        const err = new Error(`Drive download failed: ${res.status}`);
+        err.status = res.status;
+        throw err;
+    }
+    return await res.text();
+}
+
 /* ============================
    Public actions
 ============================ */
@@ -223,7 +236,7 @@ async function runBackupToDrive() {
     if (!appData) return false;
 
     driveUploading = true;
-    setExportButtonsDisabled(true);
+    setDriveButtonsDisabled(true);
     updateDriveStatus('Backing up to Drive...');
     window.addEventListener('beforeunload', blockUnloadIfUploading);
 
@@ -306,7 +319,7 @@ async function runBackupToDrive() {
         return false;
     } finally {
         driveUploading = false;
-        setExportButtonsDisabled(false);
+        setDriveButtonsDisabled(false);
         window.removeEventListener('beforeunload', blockUnloadIfUploading);
     }
 }
@@ -315,7 +328,7 @@ function blockUnloadIfUploading(e) {
     if (driveUploading) { e.preventDefault(); e.returnValue = ''; }
 }
 
-function setExportButtonsDisabled(disabled) {
+function setDriveButtonsDisabled(disabled) {
     document.querySelectorAll('.export-option-btn').forEach(btn => {
         btn.disabled = disabled;
         btn.classList.toggle('disabled', disabled);
